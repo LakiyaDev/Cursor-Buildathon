@@ -18,6 +18,18 @@ export const get = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.incidentId);
+    const inc = await ctx.db.get(args.incidentId);
+    if (!inc) return null;
+    return {
+      _id: inc._id,
+      timelineId: inc.timelineId,
+      year: inc.year,
+      title: inc.title,
+      description: inc.description,
+      location: inc.location,
+      relatedImageUrl: inc.relatedImageUrl,
+      realOutcome: inc.realOutcome,
+      order: inc.order,
+    };
   },
 });

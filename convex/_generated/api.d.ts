@@ -16,6 +16,7 @@ import type * as actions_generateTimelineFromDuration from "../actions/generateT
 import type * as actions_stabilizeTimeline from "../actions/stabilizeTimeline.js";
 import type * as actions_suggestTimeDurations from "../actions/suggestTimeDurations.js";
 import type * as auth from "../auth.js";
+import type * as authStatus from "../authStatus.js";
 import type * as devSeed from "../devSeed.js";
 import type * as http from "../http.js";
 import type * as incidents from "../incidents.js";
@@ -23,6 +24,8 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_demo from "../lib/demo.js";
 import type * as lib_gemini from "../lib/gemini.js";
+import type * as lib_geminiErrors from "../lib/geminiErrors.js";
+import type * as lib_mapSimulation from "../lib/mapSimulation.js";
 import type * as museumScans from "../museumScans.js";
 import type * as museumScansInternal from "../museumScansInternal.js";
 import type * as published from "../published.js";
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "actions/stabilizeTimeline": typeof actions_stabilizeTimeline;
   "actions/suggestTimeDurations": typeof actions_suggestTimeDurations;
   auth: typeof auth;
+  authStatus: typeof authStatus;
   devSeed: typeof devSeed;
   http: typeof http;
   incidents: typeof incidents;
@@ -60,6 +64,8 @@ declare const fullApi: ApiFromModules<{
   "lib/constants": typeof lib_constants;
   "lib/demo": typeof lib_demo;
   "lib/gemini": typeof lib_gemini;
+  "lib/geminiErrors": typeof lib_geminiErrors;
+  "lib/mapSimulation": typeof lib_mapSimulation;
   museumScans: typeof museumScans;
   museumScansInternal: typeof museumScansInternal;
   published: typeof published;

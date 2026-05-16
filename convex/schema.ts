@@ -1,3 +1,12 @@
+/**
+ * AltEra data model — maps README types to Convex tables:
+ * - PredefinedTimeline → predefinedTimelines
+ * - TimelineIncident → timelineIncidents
+ * - Simulation → simulations (+ museumScans for artifact flow)
+ * - PublishedTimeline → publishedTimelines
+ * - Remix → remixes
+ * - ExportFile → exportFiles
+ */
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
@@ -110,4 +119,12 @@ export default defineSchema({
     chaosPublished: v.number(),
     totalSimulations: v.number(),
   }).index("by_user", ["userId"]),
+
+  exportFiles: defineTable({
+    simulationId: v.id("simulations"),
+    userId: v.id("users"),
+    format: v.union(v.literal("pdf"), v.literal("json"), v.literal("image")),
+    fileUrl: v.string(),
+    createdAt: v.number(),
+  }).index("by_simulation", ["simulationId"]),
 });

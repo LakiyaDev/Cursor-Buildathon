@@ -69,6 +69,17 @@ export const getBySlug = query({
       .withIndex("by_timeline_order", (q) => q.eq("timelineId", timeline._id))
       .collect();
 
+    const mappedIncidents = incidents.map((inc) => ({
+      _id: inc._id,
+      year: inc.year,
+      title: inc.title,
+      description: inc.description,
+      location: inc.location,
+      relatedImageUrl: inc.relatedImageUrl,
+      realOutcome: inc.realOutcome,
+      order: inc.order,
+    }));
+
     return {
       timeline: {
         _id: timeline._id,
@@ -79,7 +90,7 @@ export const getBySlug = query({
         startYear: timeline.startYear,
         endYear: timeline.endYear,
       },
-      incidents,
+      incidents: mappedIncidents,
     };
   },
 });

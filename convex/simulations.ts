@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireUserId } from "./lib/auth";
+import { mapSimulationDoc } from "./lib/mapSimulation";
 import { branchChoice, simulationSource, timelineEvent } from "./validators";
 
 const simulationDoc = v.object({
@@ -100,12 +101,7 @@ export const get = query({
     const relicImageUrl = sim.relicImageId
       ? await ctx.storage.getUrl(sim.relicImageId)
       : undefined;
-    return {
-      ...sim,
-      relicImageUrl: relicImageUrl ?? undefined,
-      status: sim.status as string,
-      visibility: sim.visibility as string,
-    };
+    return mapSimulationDoc(sim, relicImageUrl ?? undefined);
   },
 });
 
@@ -115,7 +111,7 @@ export const getPublic = query({
   handler: async (ctx, args) => {
     const sim = await ctx.db.get(args.simulationId);
     if (!sim || sim.visibility !== "public") return null;
-    return { ...sim, status: sim.status as string, visibility: sim.visibility as string };
+    return mapSimulationDoc(sim);
   },
 });
 
@@ -130,11 +126,7 @@ export const listMine = query({
       .order("desc")
       .collect();
 
-    return sims.map((s) => ({
-      ...s,
-      status: s.status as string,
-      visibility: s.visibility as string,
-    }));
+    return sims.map((s) => mapSimulationDoc(s));
   },
 });
 

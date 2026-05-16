@@ -1,13 +1,29 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { api } from "@/convex/_generated/api";
 import { PageShell } from "@/components/PageShell";
+
+function googleAuthErrorMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (
+    msg.includes("41") ||
+    msg.includes("invalid_client") ||
+    msg.includes("OAuth") ||
+    msg.includes("client_id")
+  ) {
+    return "Google sign-in is not configured. Use email/password, or set AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET in Convex.";
+  }
+  return msg || "Google sign-in failed.";
+}
 
 export default function SignInPage() {
   const { signIn } = useAuthActions();
   const router = useRouter();
+  const googleConfigured = useQuery(api.authStatus.googleOAuthConfigured);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -56,43 +72,77 @@ export default function SignInPage() {
     }
   }
 
+  async function signInWithGoogle() {
+    setError(null);
+    if (googleConfigured === false) {
+      setError(
+        "Google sign-in is not configured. Use email/password, or run: npx convex env set AUTH_GOOGLE_ID … and AUTH_GOOGLE_SECRET …",
+      );
+      return;
+    }
+    try {
+      await signIn("google", { redirectTo: "/timelines" });
+    } catch (err) {
+      setError(googleAuthErrorMessage(err));
+    }
+  }
+
   return (
     <PageShell title={mode === "signIn" ? "Sign in" : "Create account"}>
-      <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
-          required
-        />
-        <input
-          type="password"
-          placeholder={
-            mode === "signUp" ? "Password (min 8 characters)" : "Password"
-          }
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
-          minLength={mode === "signUp" ? 8 : undefined}
-          required
-        />
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          type="submit"
-          className="rounded bg-amber-600 py-2 font-medium text-zinc-950 hover:bg-amber-500"
-        >
-          {mode === "signIn" ? "Sign in" : "Sign up"}
-        </button>
-        <button
-          type="button"
-          className="text-sm text-zinc-400 hover:text-zinc-200"
-          onClick={() => setMode(mode === "signIn" ? "signUp" : "signIn")}
-        >
-          {mode === "signIn" ? "Need an account? Sign up" : "Have an account? Sign in"}
-        </button>
-      </form>
+      <div className="flex max-w-md flex-col gap-6">
+        {googleConfigured !== false && (
+          <button
+            type="button"
+            onClick={() => void signInWithGoogle()}
+            className="flex items-center justify-center gap-2 rounded border border-zinc-700 bg-zinc-900 py-2.5 font-medium hover:border-zinc-500"
+          >
+            Continue with Google
+          </button>
+        )}
+        {googleConfigured === false && (
+          <p className="rounded border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-xs text-zinc-500">
+            Google sign-in is not set up on this deployment. Use email below.
+          </p>
+        )}
+        <p className="text-center text-xs text-zinc-500">or use email</p>
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
+            required
+          />
+          <input
+            type="password"
+            placeholder={
+              mode === "signUp" ? "Password (min 8 characters)" : "Password"
+            }
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
+            minLength={mode === "signUp" ? 8 : undefined}
+            required
+          />
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <button
+            type="submit"
+            className="rounded bg-amber-600 py-2 font-medium text-zinc-950 hover:bg-amber-500"
+          >
+            {mode === "signIn" ? "Sign in" : "Sign up"}
+          </button>
+          <button
+            type="button"
+            className="text-sm text-zinc-400 hover:text-zinc-200"
+            onClick={() => setMode(mode === "signIn" ? "signUp" : "signIn")}
+          >
+            {mode === "signIn"
+              ? "Need an account? Sign up"
+              : "Have an account? Sign in"}
+          </button>
+        </form>
+      </div>
     </PageShell>
   );
 }

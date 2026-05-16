@@ -8,6 +8,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { PageShell } from "@/components/PageShell";
 import { useDemoMode } from "@/lib/useDemoMode";
 
+function generationErrorMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes("429") || msg.includes("quota")) {
+    return "Gemini API quota is exhausted. Retry shortly, add a new API key in Convex, or use ?demo=1 in the URL.";
+  }
+  return "Generation failed. Try again or add ?demo=1 to the URL.";
+}
+
 export default function SimulatePage() {
   const params = useParams();
   const incidentId = params.incidentId as Id<"timelineIncidents">;
@@ -19,12 +27,15 @@ export default function SimulatePage() {
   const [whatIf, setWhatIf] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (whatIf.trim().length < 5) return;
     setLoading(true);
     setError(null);
+    setNotice(null);
+
     try {
       const simulationId = await createDraft({
         source: "curated",
@@ -32,10 +43,14 @@ export default function SimulatePage() {
         whatIfPrompt: whatIf.trim(),
       });
       await setGenerating({ simulationId });
-      await generatePhaseOne({ simulationId, demo });
-      router.push(`/simulation/${simulationId}`);
-    } catch {
-      setError("Generation failed. Try again.");
+      const result = await generatePhaseOne({ simulationId, demo });
+
+      if (result.usedDemoFallback) {
+        setNotice("Live AI quota exceeded — loaded demo timeline so you can keep going.");
+      }
+      router.push(`/simulation/${simulationId}${demo ? "?demo=1" : ""}`);
+    } catch (err) {
+      setError(generationErrorMessage(err));
       setLoading(false);
     }
   }
@@ -54,6 +69,7 @@ export default function SimulatePage() {
           placeholder="The assassin hesitates and the motorcade escapes Sarajevo."
           required
         />
+        {notice && <p className="text-sm text-amber-400">{notice}</p>}
         {error && <p className="text-sm text-red-400">{error}</p>}
         <button
           type="submit"
