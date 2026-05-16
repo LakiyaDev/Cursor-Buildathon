@@ -1,0 +1,2 @@
+export const CHAOS_WIN_THRESHOLD = 40;
+export const CHAOS_CHAOTIC_THRESHOLD = 70;

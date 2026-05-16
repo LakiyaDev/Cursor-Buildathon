@@ -1,47 +1,32 @@
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { mockTimelines } from '@/lib/mock-data'
-import { Header } from '@/components/layout/header'
-import { ExpandableTimelineCard } from '@/components/timelines/expandable-timeline-card'
+"use client";
+
+import { useQuery } from "convex/react";
+import Link from "next/link";
+import { api } from "@/convex/_generated/api";
+import { PageShell } from "@/components/PageShell";
 
 export default function TimelinesPage() {
+  const timelines = useQuery(api.timelines.list);
+
   return (
-    <div className="min-h-screen">
-      <Header />
-      
-      <main className="pt-24 pb-16 px-6">
-        <div className="mx-auto max-w-5xl">
-          {/* Breadcrumb */}
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-          
-          {/* Header */}
-          <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Historical Timelines
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Browse pivotal moments in history. Expand any era, select a critical incident, and ask &ldquo;what if&rdquo; to explore alternate realities.
-            </p>
-          </div>
-          
-          {/* Timeline Cards */}
-          <div className="space-y-6">
-            {mockTimelines.map((timeline, index) => (
-              <ExpandableTimelineCard 
-                key={timeline.slug} 
-                timeline={timeline} 
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-      </main>
-    </div>
-  )
+    <PageShell title="Historical timelines">
+      {timelines === undefined && <p className="text-zinc-500">Loading…</p>}
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {timelines?.map((t) => (
+          <li key={t._id}>
+            <Link
+              href={`/timelines/${t.slug}`}
+              className="block rounded-lg border border-zinc-800 p-4 hover:border-amber-700"
+            >
+              <h2 className="font-medium">{t.title}</h2>
+              <p className="mt-1 text-sm text-zinc-400">
+                {t.startYear}–{t.endYear}
+              </p>
+              <p className="mt-2 line-clamp-2 text-sm text-zinc-500">{t.summary}</p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </PageShell>
+  );
 }

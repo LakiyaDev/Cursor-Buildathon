@@ -1,30 +1,24 @@
-import { Header } from '@/components/layout/header'
-import { Hero } from '@/components/home/hero'
-import { EntryCards } from '@/components/home/entry-cards'
+import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-24">
-        <Hero />
-        <EntryCards />
-        
-        {/* Bottom hint */}
-        <p className="mt-16 text-xs text-muted-foreground/60 text-center max-w-md">
-          Powered by AI. Built for curiosity. What pivotal moment would you change?
-        </p>
-      </main>
-      
-      {/* Subtle grid pattern overlay */}
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.02]"
-        style={{
-          backgroundImage: `linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)`,
-          backgroundSize: '64px 64px'
-        }}
-      />
-    </div>
-  )
+    <main className="flex min-h-[calc(100vh-0px)] flex-col items-center justify-center bg-zinc-950 px-6 text-center">
+      <p className="text-xs font-medium uppercase tracking-[0.35em] text-amber-500/90">
+        AltEra
+      </p>
+      <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight text-zinc-50 sm:text-6xl">
+        Simulate the Unseen
+      </h1>
+      <p className="mt-5 max-w-lg text-lg text-zinc-400">
+        Change one moment in history. Watch the butterfly effect reshape the
+        world.
+      </p>
+      <Link
+        href="/timelines"
+        className="mt-10 rounded-lg bg-amber-600 px-8 py-3 font-medium text-zinc-950 transition hover:bg-amber-500"
+      >
+        Explore timelines
+      </Link>
+    </main>
+  );
 }
