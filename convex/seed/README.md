@@ -1,6 +1,17 @@
 # Seed data — Sri Lankan kingdoms + World War I
 
-JSON files in this folder are loaded by `seed.run` (Person A). Image files live in `public/seed/` — see `public/seed/IMAGE_MANIFEST.md`.
+JSON files in this folder are loaded by `convex/seed/run.ts`. Image files live in `public/seed/` — see `public/seed/IMAGE_MANIFEST.md`.
+
+### Run seed (dev)
+
+```bash
+npx convex dev          # or: npx convex dev --once
+npx convex run seed/run:run '{"reset": true}'
+npx convex run incidents:countAll
+npx convex run timelines:list
+```
+
+Expected: **4 timelines**, **11 incidents** (3 + 2 + 2 + 4 by slug). Verify in the [Convex dashboard](https://dashboard.convex.dev) → **Data** → `predefinedTimelines`, `timelineIncidents`.
 
 ## Timeline ↔ incident mapping
 

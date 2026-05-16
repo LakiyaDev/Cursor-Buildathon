@@ -26,13 +26,13 @@ blocks: Judge narrative (demo script, seed data)
 
 ## Your deliverables (Definition of Done)
 
-- [ ] `convex/seed/timelines.json` + `incidents.json` (Anuradhapura, Polonnaruwa, Mahanuwara — 7 incidents)
+- [x] `convex/seed/timelines.json` + `incidents.json` (4 timelines, 11 incidents incl. WWI)
 - [x] `convex/seed/demoSimulation.json` + `demoMuseum.json` + `demoStabilizeWin.json`
-- [ ] `seed.run` inserts timelines, incidents, 2–3 **chaotic** published simulations (chaos ≥ 85)
-- [ ] `public/demo-museum/artifact.jpg` + `label.jpg` (pre-tested)
-- [ ] `public/seed/` images for timelines
+- [x] `seed.run` inserts timelines + incidents (**chaotic published sims** still pending — needs full `simulations` schema)
+- [x] `public/demo-museum/artifact.jpg` + `label.jpg` (pre-tested)
+- [x] `public/seed/` images for timelines
 - [ ] `/dashboard` — global feed with Chaos / Stabilize badges
-- [ ] Stabilize UI copy + WIN/LOSE states (with Person C)
+- [x] Stabilize UI copy + WIN/LOSE states (with Person C) — `docs/STABILIZE_COPY.md` + `lib/stabilizeCopy.ts`
 - [ ] `DEMO.md` — 2-minute judge script (3 beats)
 - [ ] Backup screen recording of golden path
 - [ ] Pre-generated relic images for seed cards (optional but recommended)
@@ -57,6 +57,9 @@ components/WinBanner.tsx
 components/ChaosBadge.tsx
 DEMO.md
 docs/TEST_PROMPTS.md              # What-Ifs for Person B to test
+docs/STABILIZE_COPY.md            # Stabilize UI strings for Person C
+docs/DASHBOARD_WIREFRAME.md       # Feed + card + stabilize flow layout
+lib/stabilizeCopy.ts              # Same copy as importable constants
 ```
 
 **Coordinate:** `components/PublishButton.tsx` — you or Person C (decide at h0)
@@ -85,7 +88,7 @@ docs/TEST_PROMPTS.md              # What-Ifs for Person B to test
 ### Hours 5–9
 
 1. `docs/TEST_PROMPTS.md` — 3 What-Ifs per incident for Person B
-2. Draft dashboard layout (paper → code at h15)
+2. Draft dashboard layout (paper → code at h15) ✅ `docs/DASHBOARD_WIREFRAME.md`
 3. Pre-write stabilize UI copy:
    - CTA: **Stabilize timeline**
    - Win: **History restored — Chaos below 40**
@@ -180,8 +183,8 @@ Put this on Stabilize screen:
 | To | When | What |
 |----|------|------|
 | Person B | h4 | All demo JSON fixtures |
-| Person B | h5 | TEST_PROMPTS.md |
-| Person C | h15 | Stabilize strings + DEMO.md |
+| Person B | h5 | TEST_PROMPTS.md ✅ (`docs/TEST_PROMPTS.md`) |
+| Person C | h15 | Stabilize strings + DEMO.md ✅ (`docs/STABILIZE_COPY.md`, `lib/stabilizeCopy.ts`) |
 | Everyone | h20 | Backup video + cheat sheet |
 
 ---

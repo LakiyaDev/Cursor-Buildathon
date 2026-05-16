@@ -10,6 +10,10 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as incidents from "../incidents.js";
+import type * as seed_incidentImages from "../seed/incidentImages.js";
+import type * as seed_run from "../seed/run.js";
+import type * as timelines from "../timelines.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +24,10 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  incidents: typeof incidents;
+  "seed/incidentImages": typeof seed_incidentImages;
+  "seed/run": typeof seed_run;
+  timelines: typeof timelines;
 }>;
 
 /**
