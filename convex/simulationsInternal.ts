@@ -1,7 +1,51 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { branchChoice, timelineEvent } from "./validators";
 import { CHAOS_CHAOTIC_THRESHOLD } from "./lib/constants";
+
+export const getGenerationContext = internalQuery({
+  args: { simulationId: v.id("simulations") },
+  returns: v.union(
+    v.object({
+      whatIfPrompt: v.string(),
+      incidentTitle: v.string(),
+      incidentDescription: v.string(),
+      incidentYear: v.string(),
+      realOutcome: v.string(),
+      selectedBranchId: v.optional(v.string()),
+      selectedBranchTitle: v.optional(v.string()),
+      chaosScore: v.optional(v.number()),
+      branchChoices: v.optional(v.array(branchChoice)),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const sim = await ctx.db.get(args.simulationId);
+    if (!sim?.changedIncidentId || !sim.whatIfPrompt) return null;
+
+    const incident = await ctx.db.get(sim.changedIncidentId);
+    if (!incident) return null;
+
+    let selectedBranchTitle: string | undefined;
+    if (sim.selectedBranchId && sim.branchChoices) {
+      selectedBranchTitle = sim.branchChoices.find(
+        (b) => b.id === sim.selectedBranchId,
+      )?.title;
+    }
+
+    return {
+      whatIfPrompt: sim.whatIfPrompt,
+      incidentTitle: incident.title,
+      incidentDescription: incident.description,
+      incidentYear: incident.year,
+      realOutcome: incident.realOutcome,
+      selectedBranchId: sim.selectedBranchId,
+      selectedBranchTitle,
+      chaosScore: sim.chaosScore,
+      branchChoices: sim.branchChoices,
+    };
+  },
+});
 
 export const patchPhase1 = internalMutation({
   args: {

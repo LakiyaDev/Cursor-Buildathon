@@ -1,0 +1,53 @@
+{
+  "description": "Offline stabilize win for ?demo=1 / Beat 3. Pair with seeded published simulation 'The Convention Reversed' (chaos ~88). Person B: on demo, apply demoSelectedChoiceIds and return result block.",
+  "targetSimulationTitle": "The Convention Reversed",
+  "initialChaosScore": 88,
+  "challengeStart": {
+    "correctiveChoices": [
+      {
+        "id": "fix_1",
+        "title": "Restore the Magul Maduwa treaty text",
+        "description": "Reintroduce the original 1815 convention wording as the legal baseline, reducing diplomatic ambiguity."
+      },
+      {
+        "id": "fix_2",
+        "title": "Reinstate exiled Kandyan nobles",
+        "description": "Bring moderating chiefs back into court politics to counter radical anti-British factions."
+      },
+      {
+        "id": "fix_3",
+        "title": "Negotiate a protected monarchy clause",
+        "description": "Trade limited British oversight for a crowned head and stable succession law."
+      },
+      {
+        "id": "fix_4",
+        "title": "Demobilize rebel militias in the hills",
+        "description": "Disarm irregular bands that keep raiding plantations and inflaming chaos scores."
+      },
+      {
+        "id": "fix_5",
+        "title": "Open Colombo trade councils",
+        "description": "Channel economic grievances into scheduled assemblies instead of sporadic uprisings."
+      }
+    ]
+  },
+  "demoSelectedChoiceIds": ["fix_2", "fix_4"],
+  "result": {
+    "resultingChaosScore": 32,
+    "won": true,
+    "eventsPatch": [
+      {
+        "year": "1816",
+        "title": "Noble mediation at Kandy",
+        "description": "Returned chiefs broker a ceasefire between the crown and British residents, pausing open rebellion.",
+        "impactLevel": "high"
+      },
+      {
+        "year": "1817",
+        "title": "Hill country disarmament",
+        "description": "Registered militias lay down arms in exchange for land guarantees, lowering raids on low-country estates.",
+        "impactLevel": "high"
+      }
+    ]
+  }
+}

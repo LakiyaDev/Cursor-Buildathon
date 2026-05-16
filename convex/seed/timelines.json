@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Anuradhapura Kingdom",
+    "slug": "anuradhapura",
+    "summary": "The first established kingdom of ancient Sri Lanka, known for its massive stupas and advanced hydraulic civilization.",
+    "coverImageUrl": "/seed/anuradhapura-cover.jpg",
+    "startYear": -377,
+    "endYear": 1017
+  },
+  {
+    "title": "Polonnaruwa Kingdom",
+    "slug": "polonnaruwa",
+    "summary": "A golden era of agricultural prosperity and reunification under mighty kings.",
+    "coverImageUrl": "/seed/polonnaruwa-cover.jpg",
+    "startYear": 1055,
+    "endYear": 1232
+  },
+  {
+    "title": "Kandyan Kingdom (Mahanuwara)",
+    "slug": "mahanuwara",
+    "summary": "The last independent monarchy of Sri Lanka, a mountain fortress that resisted colonial powers for over two centuries.",
+    "coverImageUrl": "/seed/kandy-cover.jpg",
+    "startYear": 1469,
+    "endYear": 1815
+  },
+  {
+    "title": "World War I",
+    "slug": "wwi",
+    "summary": "The war to end all wars, sparked in Sarajevo.",
+    "coverImageUrl": "/seed/wwi-cover.jpg",
+    "startYear": 1914,
+    "endYear": 1919
+  }
+]

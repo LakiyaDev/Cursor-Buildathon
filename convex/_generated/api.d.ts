@@ -21,6 +21,8 @@ import type * as http from "../http.js";
 import type * as incidents from "../incidents.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
+import type * as lib_demo from "../lib/demo.js";
+import type * as lib_gemini from "../lib/gemini.js";
 import type * as museumScans from "../museumScans.js";
 import type * as museumScansInternal from "../museumScansInternal.js";
 import type * as published from "../published.js";
@@ -56,6 +58,8 @@ declare const fullApi: ApiFromModules<{
   incidents: typeof incidents;
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
+  "lib/demo": typeof lib_demo;
+  "lib/gemini": typeof lib_gemini;
   museumScans: typeof museumScans;
   museumScansInternal: typeof museumScansInternal;
   published: typeof published;

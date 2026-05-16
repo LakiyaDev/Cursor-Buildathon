@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PageShell } from "@/components/PageShell";
+import { useDemoMode } from "@/lib/useDemoMode";
 
 export default function MuseumScanPage() {
   const params = useParams();
@@ -17,26 +18,27 @@ export default function MuseumScanPage() {
   const setDuration = useMutation(api.simulations.setMuseumDuration);
   const generateTimeline = useAction(api.actions.generateTimelineFromDuration.run);
   const router = useRouter();
+  const demo = useDemoMode();
   const [durationOptions, setDurationOptions] = useState<
     { id: string; label: string; description: string }[] | null
   >(null);
 
   useEffect(() => {
     if (scan?.status === "uploaded") {
-      void analyze({ scanId });
+      void analyze({ scanId, demo });
     }
   }, [scan?.status, scanId, analyze]);
 
   useEffect(() => {
     if (scan?.status === "analyzed" && !durationOptions) {
-      void durations({ scanId }).then((r) => setDurationOptions(r.options));
+      void durations({ scanId, demo }).then((r) => setDurationOptions(r.options));
     }
   }, [scan?.status, scanId, durations, durationOptions]);
 
   async function pickDuration(id: string, label: string) {
     const simulationId = await createDraft({ source: "museum", museumScanId: scanId });
     await setDuration({ simulationId, selectedDurationId: id, selectedDurationLabel: label });
-    await generateTimeline({ simulationId, durationId: id });
+    await generateTimeline({ simulationId, durationId: id, demo });
     router.push(`/simulation/${simulationId}`);
   }
 

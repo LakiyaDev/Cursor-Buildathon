@@ -6,6 +6,7 @@ import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PageShell } from "@/components/PageShell";
+import { useDemoMode } from "@/lib/useDemoMode";
 
 export default function SimulatePage() {
   const params = useParams();
@@ -14,6 +15,7 @@ export default function SimulatePage() {
   const createDraft = useMutation(api.simulations.createDraft);
   const setGenerating = useMutation(api.simulations.setGenerating);
   const generatePhaseOne = useAction(api.actions.generatePhaseOne.run);
+  const demo = useDemoMode();
   const [whatIf, setWhatIf] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function SimulatePage() {
         whatIfPrompt: whatIf.trim(),
       });
       await setGenerating({ simulationId });
-      await generatePhaseOne({ simulationId });
+      await generatePhaseOne({ simulationId, demo });
       router.push(`/simulation/${simulationId}`);
     } catch {
       setError("Generation failed. Try again.");

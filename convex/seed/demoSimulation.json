@@ -1,0 +1,8 @@
+{
+  "chaosScore": 78,
+  "events": [
+    { "year": "1815", "title": "The Rebellion of the Chiefs", "description": "Instead of signing the convention, the Kandyan chieftains betray the British envoys and rally behind the King.", "impactLevel": "high" }
+  ],
+  "lostToHistory": ["British colonial rule over the entire island", "The rapid expansion of coffee and tea plantations"],
+  "gainedByHumanity": ["Survival of the Kandyan Monarchy", "Preservation of traditional Kandyan administrative systems"]
+}

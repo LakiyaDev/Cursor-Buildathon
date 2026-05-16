@@ -6,10 +6,13 @@ import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PageShell } from "@/components/PageShell";
+import { WinBanner } from "@/components/WinBanner";
+import { useDemoMode } from "@/lib/useDemoMode";
 
 export default function StabilizePage() {
   const params = useParams();
   const simulationId = params.simulationId as Id<"simulations">;
+  const demo = useDemoMode();
   const startChallenge = useAction(api.actions.stabilizeTimeline.startChallenge);
   const submitFixes = useAction(api.actions.stabilizeTimeline.submitFixes);
   const recordAttempt = useMutation(api.stabilization.recordAttempt);
@@ -18,30 +21,42 @@ export default function StabilizePage() {
   >([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [result, setResult] = useState<{ chaos: number; won: boolean } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    void startChallenge({ simulationId }).then((r) => setChoices(r.correctiveChoices));
-  }, [simulationId, startChallenge]);
+    void startChallenge({ simulationId, demo }).then((r) => {
+      setChoices(r.correctiveChoices);
+      if (demo) {
+        setSelected(["fix_2", "fix_4"]);
+      }
+    });
+  }, [simulationId, demo, startChallenge]);
 
   async function onSubmit() {
-    const r = await submitFixes({
-      simulationId,
-      selectedChoiceIds: selected,
-      correctiveChoices: choices,
-    });
-    await recordAttempt({
-      targetSimulationId: simulationId,
-      correctiveChoices: choices,
-      selectedChoiceIds: selected,
-      resultingChaosScore: r.resultingChaosScore,
-    });
-    setResult({ chaos: r.resultingChaosScore, won: r.won });
+    setSubmitting(true);
+    try {
+      const r = await submitFixes({
+        simulationId,
+        selectedChoiceIds: selected,
+        correctiveChoices: choices,
+        demo,
+      });
+      await recordAttempt({
+        targetSimulationId: simulationId,
+        correctiveChoices: choices,
+        selectedChoiceIds: selected,
+        resultingChaosScore: r.resultingChaosScore,
+      });
+      setResult({ chaos: r.resultingChaosScore, won: r.won });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <PageShell title="Stabilize timeline">
       <p className="text-zinc-400">
-        Pick corrective decisions to lower chaos below 40 and restore stability.
+        Pick fixes until chaos drops below 40.
       </p>
       <ul className="mt-6 space-y-3">
         {choices.map((c) => (
@@ -67,16 +82,12 @@ export default function StabilizePage() {
       <button
         type="button"
         onClick={onSubmit}
-        disabled={selected.length === 0}
-        className="mt-6 rounded bg-emerald-600 px-4 py-2 text-sm font-medium disabled:opacity-50"
+        disabled={selected.length === 0 || submitting}
+        className="mt-6 rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-zinc-950 disabled:opacity-50"
       >
-        Apply fixes
+        {submitting ? "Applying fixes…" : "Stabilize timeline"}
       </button>
-      {result && (
-        <p className={`mt-4 text-lg ${result.won ? "text-emerald-400" : "text-amber-400"}`}>
-          Chaos: {result.chaos} — {result.won ? "You win!" : "Still unstable"}
-        </p>
-      )}
+      {result && <WinBanner won={result.won} chaos={result.chaos} />}
     </PageShell>
   );
 }

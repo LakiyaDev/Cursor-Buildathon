@@ -22,6 +22,7 @@ const simulationDoc = v.object({
   selectedBranchId: v.optional(v.string()),
   relicPrompt: v.optional(v.string()),
   relicImageId: v.optional(v.id("_storage")),
+  relicImageUrl: v.optional(v.string()),
   isChaotic: v.optional(v.boolean()),
   status: v.string(),
   visibility: v.string(),
@@ -96,7 +97,15 @@ export const get = query({
       return null;
     }
 
-    return { ...sim, status: sim.status as string, visibility: sim.visibility as string };
+    const relicImageUrl = sim.relicImageId
+      ? await ctx.storage.getUrl(sim.relicImageId)
+      : undefined;
+    return {
+      ...sim,
+      relicImageUrl: relicImageUrl ?? undefined,
+      status: sim.status as string,
+      visibility: sim.visibility as string,
+    };
   },
 });
 

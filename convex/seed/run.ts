@@ -1,134 +1,188 @@
 import { internalMutation } from "../_generated/server";
+import { Id } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { CHAOS_CHAOTIC_THRESHOLD } from "../lib/constants";
 import { demoPhase1, demoPhase2 } from "./demoData";
+import timelinesData from "./timelines.json";
+import incidentsData from "./incidents.json";
+
+const INCIDENT_IMAGES: Record<number, string> = {
+  1: "/seed/arahat-mahinda.jpg",
+  2: "/seed/battle-vijithapura.jpg",
+  3: "/seed/chola-invasion.jpg",
+  4: "/seed/parakramabahu.jpg",
+  5: "/seed/kalinga-magha.jpg",
+  6: "/seed/battle-danture.jpg",
+  7: "/seed/kandyan-convention.jpg",
+  8: "/seed/franz-ferdinand.jpg",
+  9: "/seed/lusitania.jpg",
+  10: "/seed/zimmermann-telegram.jpg",
+  11: "/seed/treaty-versailles.jpg",
+};
+
+function timelineSlugForOrder(order: number): string {
+  if (order <= 3) return "anuradhapura";
+  if (order <= 5) return "polonnaruwa";
+  if (order <= 7) return "mahanuwara";
+  return "wwi";
+}
+
+type TimelineRow = (typeof timelinesData)[number];
+type IncidentRow = (typeof incidentsData)[number];
 
 export const seedAll = internalMutation({
-  args: {},
+  args: { force: v.optional(v.boolean()) },
   returns: v.object({
     timelineIds: v.array(v.id("predefinedTimelines")),
-    publishedSimulationId: v.optional(v.id("simulations")),
+    publishedSimulationIds: v.array(v.id("simulations")),
+    skipped: v.boolean(),
   }),
-  handler: async (ctx) => {
-    const existing = await ctx.db.query("predefinedTimelines").first();
-    if (existing) {
-      return { timelineIds: [], publishedSimulationId: undefined };
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("predefinedTimelines").collect();
+    if (existing.length >= 4 && !args.force) {
+      return { timelineIds: [], publishedSimulationIds: [], skipped: true };
+    }
+
+    if (args.force && existing.length > 0) {
+      for (const t of existing) {
+        const incidents = await ctx.db
+          .query("timelineIncidents")
+          .withIndex("by_timeline_order", (q) => q.eq("timelineId", t._id))
+          .collect();
+        for (const inc of incidents) {
+          await ctx.db.delete(inc._id);
+        }
+        await ctx.db.delete(t._id);
+      }
+      const published = await ctx.db.query("publishedTimelines").collect();
+      for (const p of published) {
+        const sim = await ctx.db.get(p.simulationId);
+        await ctx.db.delete(p._id);
+        if (sim) await ctx.db.delete(sim._id);
+      }
     }
 
     const now = Date.now();
+    const slugToId = new Map<string, Id<"predefinedTimelines">>();
 
-    const wwiId = await ctx.db.insert("predefinedTimelines", {
-      title: "World War I",
-      slug: "world-war-i",
-      summary:
-        "The Great War reshaped nations, empires, and the modern world through industrial-scale conflict.",
-      coverImageUrl: "/seed/wwi.jpg",
-      startYear: 1914,
-      endYear: 1918,
-      createdAt: now,
-    });
-
-    const wwiiId = await ctx.db.insert("predefinedTimelines", {
-      title: "World War II",
-      slug: "world-war-ii",
-      summary:
-        "A global struggle that redefined borders, technology, and the moral stakes of total war.",
-      coverImageUrl: "/seed/wwii.jpg",
-      startYear: 1939,
-      endYear: 1945,
-      createdAt: now,
-    });
-
-    const ferdinandId = await ctx.db.insert("timelineIncidents", {
-      timelineId: wwiId,
-      year: "1914",
-      title: "Assassination of Archduke Franz Ferdinand",
-      description:
-        "The heir to Austria-Hungary is shot in Sarajevo, triggering a chain of alliances and mobilizations.",
-      location: "Sarajevo",
-      realOutcome:
-        "Austria-Hungary declared war on Serbia; Europe slid into World War I within weeks.",
-      order: 1,
-    });
-
-    await ctx.db.insert("timelineIncidents", {
-      timelineId: wwiId,
-      year: "1915",
-      title: "Sinking of the Lusitania",
-      description:
-        "A British liner is torpedoed by a German U-boat, killing civilians including Americans.",
-      location: "Atlantic Ocean",
-      realOutcome: "Anger grew in the United States; Germany later restricted submarine warfare.",
-      order: 2,
-    });
-
-    await ctx.db.insert("timelineIncidents", {
-      timelineId: wwiiId,
-      year: "1939",
-      title: "Invasion of Poland",
-      description: "Germany launches a blitzkrieg invasion, drawing Britain and France into war.",
-      location: "Poland",
-      realOutcome: "World War II in Europe began; Poland was partitioned within weeks.",
-      order: 1,
-    });
-
-    await ctx.db.insert("timelineIncidents", {
-      timelineId: wwiiId,
-      year: "1941",
-      title: "Attack on Pearl Harbor",
-      description: "Japan strikes the U.S. naval base, destroying much of the Pacific fleet.",
-      location: "Pearl Harbor, Hawaii",
-      realOutcome: "The United States entered World War II against Japan and its allies.",
-      order: 2,
-    });
-
-    const demoUser = await ctx.db.query("users").first();
-    let publishedSimulationId = undefined;
-
-    if (demoUser) {
-      const simId = await ctx.db.insert("simulations", {
-        userId: demoUser._id,
-        source: "curated",
-        originalTimelineId: wwiId,
-        changedIncidentId: ferdinandId,
-        whatIfPrompt:
-          "The assassin hesitates and the motorcade escapes Sarajevo.",
-        events: [
-          ...demoPhase1.immediateRipple,
-          ...demoPhase1.generationalShift,
-          ...demoPhase2.globalConsequence,
-        ],
-        chaosScore: 88,
-        lostToHistory: demoPhase2.lostToHistory,
-        gainedByHumanity: demoPhase2.gainedByHumanity,
-        branchChoices: demoPhase1.branchChoices,
-        selectedBranchId: "branch_1",
-        relicPrompt: demoPhase2.relicPrompt,
-        isChaotic: true,
-        status: "published",
-        visibility: "public",
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      await ctx.db.insert("publishedTimelines", {
-        simulationId: simId,
-        authorId: demoUser._id,
-        title: "The Sarajevo Escape",
-        description:
-          "What if Franz Ferdinand survived? A high-chaos timeline for the stabilize game.",
-        chaosScore: 88,
+    for (const row of timelinesData as TimelineRow[]) {
+      const id = await ctx.db.insert("predefinedTimelines", {
+        title: row.title,
+        slug: row.slug,
+        summary: row.summary,
+        coverImageUrl: row.coverImageUrl,
+        startYear: row.startYear,
+        endYear: row.endYear,
         createdAt: now,
       });
-
-      publishedSimulationId = simId;
+      slugToId.set(row.slug, id);
     }
 
-    void CHAOS_CHAOTIC_THRESHOLD;
+    const incidentIds = new Map<number, Id<"timelineIncidents">>();
+
+    for (const row of incidentsData as IncidentRow[]) {
+      const slug = timelineSlugForOrder(row.order);
+      const timelineId = slugToId.get(slug);
+      if (!timelineId) continue;
+
+      const id = await ctx.db.insert("timelineIncidents", {
+        timelineId,
+        year: row.year,
+        title: row.title,
+        description: row.description,
+        location: row.location,
+        relatedImageUrl: INCIDENT_IMAGES[row.order],
+        realOutcome: row.realOutcome,
+        order: row.order,
+      });
+      incidentIds.set(row.order, id);
+    }
+
+    const publishedSimulationIds: Id<"simulations">[] = [];
+    const demoUser = await ctx.db.query("users").first();
+
+    if (demoUser) {
+      const wwiId = slugToId.get("wwi")!;
+      const mahanuwaraId = slugToId.get("mahanuwara")!;
+      const polonnaruwaId = slugToId.get("polonnaruwa")!;
+      const ferdinandId = incidentIds.get(8)!;
+      const conventionId = incidentIds.get(7)!;
+      const maghaId = incidentIds.get(5)!;
+
+      const publishes = [
+        {
+          title: "The Convention Reversed",
+          description:
+            "What if Kandyan chieftains refused the 1815 treaty? A chaotic alternate Sri Lanka.",
+          chaosScore: 88,
+          timelineId: mahanuwaraId,
+          incidentId: conventionId,
+          whatIf:
+            "The chieftains tear up the Kandyan Convention and rally behind the king against the British.",
+        },
+        {
+          title: "Magha's Eternal Reign",
+          description:
+            "Polonnaruwa never recovers from Kalinga Magha — the kingdom fractures for generations.",
+          chaosScore: 91,
+          timelineId: polonnaruwaId,
+          incidentId: maghaId,
+          whatIf:
+            "Kalinga Magha consolidates rule instead of triggering migration, halting Sinhalese revival.",
+        },
+        {
+          title: "The Sarajevo Escape",
+          description:
+            "Franz Ferdinand survives 1914 — Europe stumbles toward a different catastrophe.",
+          chaosScore: 88,
+          timelineId: wwiId,
+          incidentId: ferdinandId,
+          whatIf: "The assassin hesitates and the motorcade escapes Sarajevo.",
+        },
+      ];
+
+      for (const pub of publishes) {
+        const simId = await ctx.db.insert("simulations", {
+          userId: demoUser._id,
+          source: "curated",
+          originalTimelineId: pub.timelineId,
+          changedIncidentId: pub.incidentId,
+          whatIfPrompt: pub.whatIf,
+          events: [
+            ...demoPhase1.immediateRipple,
+            ...demoPhase1.generationalShift,
+            ...demoPhase2.globalConsequence,
+          ],
+          chaosScore: pub.chaosScore,
+          lostToHistory: demoPhase2.lostToHistory,
+          gainedByHumanity: demoPhase2.gainedByHumanity,
+          branchChoices: demoPhase1.branchChoices,
+          selectedBranchId: "branch_1",
+          relicPrompt: demoPhase2.relicPrompt,
+          isChaotic: pub.chaosScore >= CHAOS_CHAOTIC_THRESHOLD,
+          status: "published",
+          visibility: "public",
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        await ctx.db.insert("publishedTimelines", {
+          simulationId: simId,
+          authorId: demoUser._id,
+          title: pub.title,
+          description: pub.description,
+          chaosScore: pub.chaosScore,
+          createdAt: now,
+        });
+
+        publishedSimulationIds.push(simId);
+      }
+    }
 
     return {
-      timelineIds: [wwiId, wwiiId],
-      publishedSimulationId,
+      timelineIds: [...slugToId.values()],
+      publishedSimulationIds,
+      skipped: false,
     };
   },
 });

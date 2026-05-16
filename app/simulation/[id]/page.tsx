@@ -2,20 +2,32 @@
 
 import { useAction, useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PageShell } from "@/components/PageShell";
+import { ChaosBadge } from "@/components/ChaosBadge";
+import { useDemoMode } from "@/lib/useDemoMode";
 
 export default function SimulationPage() {
   const params = useParams();
   const simulationId = params.id as Id<"simulations">;
+  const demo = useDemoMode();
   const sim = useQuery(api.simulations.get, { simulationId });
   const selectBranch = useMutation(api.simulations.selectBranch);
   const generatePhaseTwo = useAction(api.actions.generatePhaseTwo.run);
+  const generateRelicImage = useAction(api.actions.generateRelicImage.run);
   const save = useMutation(api.simulations.save);
   const publish = useMutation(api.published.publish);
   const [loading, setLoading] = useState(false);
+  const [relicLoading, setRelicLoading] = useState(false);
+
+  useEffect(() => {
+    if (sim?.status === "editable" && sim.relicPrompt && !sim.relicImageUrl && !relicLoading) {
+      setRelicLoading(true);
+      void generateRelicImage({ simulationId, demo }).finally(() => setRelicLoading(false));
+    }
+  }, [sim?.status, sim?.relicPrompt, sim?.relicImageUrl, simulationId, demo, generateRelicImage, relicLoading]);
 
   if (sim === undefined) {
     return (
@@ -35,18 +47,32 @@ export default function SimulationPage() {
 
   async function onBranch(branchId: string) {
     setLoading(true);
-    await selectBranch({ simulationId, selectedBranchId: branchId });
-    await generatePhaseTwo({ simulationId });
-    setLoading(false);
+    try {
+      await selectBranch({ simulationId, selectedBranchId: branchId });
+      await generatePhaseTwo({ simulationId, demo });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <PageShell title="Alternate timeline">
       {sim.chaosScore != null && (
-        <p className="text-lg">
-          Chaos score: <span className="font-semibold text-amber-500">{sim.chaosScore}</span>
-        </p>
+        <div className="flex items-center gap-3">
+          <ChaosBadge score={sim.chaosScore} chaotic={sim.isChaotic} />
+          {sim.whatIfPrompt && (
+            <p className="text-sm italic text-zinc-400">&ldquo;{sim.whatIfPrompt}&rdquo;</p>
+          )}
+        </div>
       )}
+      {sim.relicImageUrl && (
+        <img
+          src={sim.relicImageUrl}
+          alt="Alternate history relic"
+          className="mt-4 max-h-64 rounded-lg border border-zinc-800 object-cover"
+        />
+      )}
+      {relicLoading && <p className="mt-2 text-sm text-zinc-500">Generating relic image…</p>}
       <section className="mt-6 space-y-3">
         <h2 className="text-sm uppercase tracking-wider text-zinc-500">Events</h2>
         {sim.events.map((ev, i) => (
@@ -69,7 +95,7 @@ export default function SimulationPage() {
                 type="button"
                 disabled={loading}
                 onClick={() => onBranch(b.id)}
-                className="rounded border border-zinc-700 p-3 text-left hover:border-amber-600"
+                className="rounded border border-zinc-700 p-3 text-left hover:border-amber-600 disabled:opacity-50"
               >
                 <p className="font-medium">{b.title}</p>
                 <p className="text-sm text-zinc-400">{b.description}</p>
