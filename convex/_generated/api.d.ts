@@ -18,11 +18,13 @@ import type * as actions_suggestTimeDurations from "../actions/suggestTimeDurati
 import type * as auth from "../auth.js";
 import type * as authStatus from "../authStatus.js";
 import type * as devSeed from "../devSeed.js";
+import type * as engine from "../engine.js";
 import type * as http from "../http.js";
 import type * as incidents from "../incidents.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_demo from "../lib/demo.js";
+import type * as lib_demoFixtures from "../lib/demoFixtures.js";
 import type * as lib_gemini from "../lib/gemini.js";
 import type * as lib_geminiErrors from "../lib/geminiErrors.js";
 import type * as lib_mapSimulation from "../lib/mapSimulation.js";
@@ -58,11 +60,13 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authStatus: typeof authStatus;
   devSeed: typeof devSeed;
+  engine: typeof engine;
   http: typeof http;
   incidents: typeof incidents;
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
   "lib/demo": typeof lib_demo;
+  "lib/demoFixtures": typeof lib_demoFixtures;
   "lib/gemini": typeof lib_gemini;
   "lib/geminiErrors": typeof lib_geminiErrors;
   "lib/mapSimulation": typeof lib_mapSimulation;

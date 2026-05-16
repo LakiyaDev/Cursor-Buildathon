@@ -3,6 +3,15 @@ import { v } from "convex/values";
 import { branchChoice, timelineEvent } from "./validators";
 import { CHAOS_CHAOTIC_THRESHOLD } from "./lib/constants";
 
+export const getRelicPrompt = internalQuery({
+  args: { simulationId: v.id("simulations") },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    const sim = await ctx.db.get(args.simulationId);
+    return sim?.relicPrompt ?? null;
+  },
+});
+
 export const getGenerationContext = internalQuery({
   args: { simulationId: v.id("simulations") },
   returns: v.union(
@@ -16,6 +25,7 @@ export const getGenerationContext = internalQuery({
       selectedBranchTitle: v.optional(v.string()),
       chaosScore: v.optional(v.number()),
       branchChoices: v.optional(v.array(branchChoice)),
+      timelineSlug: v.optional(v.string()),
     }),
     v.null(),
   ),
@@ -25,6 +35,8 @@ export const getGenerationContext = internalQuery({
 
     const incident = await ctx.db.get(sim.changedIncidentId);
     if (!incident) return null;
+
+    const timeline = await ctx.db.get(incident.timelineId);
 
     let selectedBranchTitle: string | undefined;
     if (sim.selectedBranchId && sim.branchChoices) {
@@ -43,6 +55,7 @@ export const getGenerationContext = internalQuery({
       selectedBranchTitle,
       chaosScore: sim.chaosScore,
       branchChoices: sim.branchChoices,
+      timelineSlug: timeline?.slug,
     };
   },
 });
@@ -61,6 +74,8 @@ export const patchPhase1 = internalMutation({
     await ctx.db.patch(args.simulationId, {
       chaosScore: args.chaosScore,
       events,
+      immediateRipple: args.immediateRipple,
+      generationalShift: args.generationalShift,
       branchChoices: args.branchChoices,
       isChaotic: args.chaosScore >= CHAOS_CHAOTIC_THRESHOLD,
       status: "phase1",
@@ -85,6 +100,7 @@ export const patchPhase2 = internalMutation({
 
     await ctx.db.patch(args.simulationId, {
       events: [...sim.events, ...args.globalConsequence],
+      globalConsequence: args.globalConsequence,
       lostToHistory: args.lostToHistory,
       gainedByHumanity: args.gainedByHumanity,
       relicPrompt: args.relicPrompt,
