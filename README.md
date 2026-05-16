@@ -1,6 +1,7 @@
-# TimeLens
+# AltEra
+## Simulate the Unseen.
 
-**TimeLens** is an AI-powered alternate history simulator where users change one specific historical incident and watch a new timeline unfold. The app is built around the butterfly effect: one small change in the past can reshape politics, technology, borders, culture, and the modern world.
+**AltEra** is an AI-powered alternate history simulator where users change one specific historical incident and watch a new timeline unfold. The app is built around the butterfly effect: one small change in the past can reshape politics, technology, borders, culture, and the modern world.
 
 Users begin with a predefined historical timeline such as **World War I** or **World War II**, select one real incident, enter a single-sentence "What if?" change, and receive an AI-generated alternate timeline with ripple effects, branching decisions, global consequences, and visual relics from the new reality.
 
