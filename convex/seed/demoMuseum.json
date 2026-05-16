@@ -1,0 +1,86 @@
+{
+  "description": "Offline museum path for ?demo=1. Matches public/demo-museum/artifact.jpg and label.jpg. Person B: return vision → durations → timeline sections when DEMO_MODE or ?demo=1.",
+  "artifactImagePath": "/demo-museum/artifact.jpg",
+  "labelImagePath": "/demo-museum/label.jpg",
+  "vision": {
+    "artifactName": "Standing Buddha sculpture",
+    "artifactType": "art",
+    "labelText": "National Museum of Colombo. Artifact: Standing Buddha sculpture. Period: c. 2nd-3rd century CE. Material: Stone. Kingdom: Anuradhapura era. Location: Colombo, Sri Lanka. Ancient Sri Lankan stone sculpture displayed in the archaeology gallery.",
+    "estimatedEra": "Anuradhapura period, c. 2nd–3rd century CE",
+    "historicalContext": "Stone Buddha from the early Buddhist kingdom of Anuradhapura, representing the fusion of Indian Buddhist art with indigenous Sri Lankan craftsmanship during the island's first great capital.",
+    "confidence": 0.93
+  },
+  "durations": {
+    "options": [
+      {
+        "id": "dur_1",
+        "label": "25 years",
+        "spanYears": 25,
+        "description": "Immediate regional ripples across the island"
+      },
+      {
+        "id": "dur_2",
+        "label": "50 years",
+        "spanYears": 50,
+        "description": "One generation — monastic and royal succession shifts"
+      },
+      {
+        "id": "dur_3",
+        "label": "75 years",
+        "spanYears": 75,
+        "description": "Generational transformation of Buddhist patronage and trade"
+      },
+      {
+        "id": "dur_4",
+        "label": "150 years",
+        "spanYears": 150,
+        "description": "From late Anuradhapura toward Polonnaruwa's rise"
+      },
+      {
+        "id": "dur_5",
+        "label": "300 years",
+        "spanYears": 300,
+        "description": "Centuries of hydraulic and monastic expansion"
+      }
+    ]
+  },
+  "recommendedDurationId": "dur_3",
+  "timeline": {
+    "chaosScore": 76,
+    "events": [
+      {
+        "year": "275",
+        "title": "Colombo shrine network expands",
+        "description": "Patronage from the western coast accelerates new stupas and image houses modeled on the museum Buddha's style.",
+        "impactLevel": "medium"
+      },
+      {
+        "year": "310",
+        "title": "Monastic councils standardize iconography",
+        "description": "Island-wide councils fix sculptural canons, spreading Anuradhapura-era forms before the Chola pressures of later centuries.",
+        "impactLevel": "high"
+      },
+      {
+        "year": "340",
+        "title": "Pearl and spice routes pivot inland",
+        "description": "Royal storehouses near ancient capitals hoard revenue that might otherwise flow to competing ports.",
+        "impactLevel": "medium"
+      },
+      {
+        "year": "365",
+        "title": "Hydraulic charters precede Polonnaruwa",
+        "description": "Early tank commissions foreshadow the irrigation golden age, binding villages to monastic estates.",
+        "impactLevel": "high"
+      }
+    ],
+    "lostToHistory": [
+      "Uniform colonial cataloguing of Sinhalese bronzes",
+      "Several minor coastal chiefdoms absorbed without record"
+    ],
+    "gainedByHumanity": [
+      "A pan-island sculptural tradition preserved in living monasteries",
+      "Earlier written chronicles of Anuradhapura patronage"
+    ],
+    "relicPrompt": "Museum photograph of a weathered 3rd-century Sri Lankan stone Buddha torso, soft gallery lighting, archival label card, realistic archaeological artifact."
+  }
+}
