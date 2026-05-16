@@ -458,4 +458,3 @@ function ExpandedStoryCard({
     </div>
   )
 }
-

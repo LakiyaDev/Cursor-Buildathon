@@ -418,6 +418,27 @@ export function getIncidentById(id: string): { timeline: Timeline; incident: Tim
   return undefined
 }
 
+// Story slides for immersive gallery (falls back to ripples when no story cards yet)
+export function getStorySlides(
+  simulation: Simulation,
+  incidentImage?: string,
+): StoryCard[] {
+  if (simulation.storyCards && simulation.storyCards.length > 0) {
+    return simulation.storyCards
+  }
+
+  const image = incidentImage ?? simulation.relicImage ?? '/images/relic-demo.jpg'
+  return simulation.ripples.slice(0, 5).map((ripple, index) => ({
+    id: `ripple-slide-${index}`,
+    year: '—',
+    title: `Consequence ${index + 1}`,
+    description: ripple,
+    imagePrompt: '',
+    image,
+    isAlternate: true,
+  }))
+}
+
 // Simulate API delay for realistic UX
 export async function simulateDelay(ms: number = 1500): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
