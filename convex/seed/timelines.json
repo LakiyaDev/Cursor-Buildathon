@@ -30,5 +30,13 @@
     "coverImageUrl": "/seed/wwi-cover.jpg",
     "startYear": 1914,
     "endYear": 1919
+  },
+  {
+    "title": "Roman Empire",
+    "slug": "roman-empire",
+    "summary": "From the assassination of Caesar to the fall of Rome — the empire that shaped the West.",
+    "coverImageUrl": "/seed/roman-empire-cover.jpg",
+    "startYear": -27,
+    "endYear": 476
   }
 ]

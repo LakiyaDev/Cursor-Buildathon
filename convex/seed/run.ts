@@ -18,13 +18,17 @@ const INCIDENT_IMAGES: Record<number, string> = {
   9: "/seed/lusitania.jpg",
   10: "/seed/zimmermann-telegram.jpg",
   11: "/seed/treaty-versailles.jpg",
+  12: "/seed/julius-caesar.jpg",
+  13: "/seed/edict-milan.jpg",
+  14: "/seed/fall-of-rome.jpg",
 };
 
 function timelineSlugForOrder(order: number): string {
   if (order <= 3) return "anuradhapura";
   if (order <= 5) return "polonnaruwa";
   if (order <= 7) return "mahanuwara";
-  return "wwi";
+  if (order <= 11) return "wwi";
+  return "roman-empire";
 }
 
 type TimelineRow = (typeof timelinesData)[number];
@@ -39,7 +43,7 @@ export const seedAll = internalMutation({
   }),
   handler: async (ctx, args) => {
     const existing = await ctx.db.query("predefinedTimelines").collect();
-    if (existing.length >= 4 && !args.force) {
+    if (existing.length >= 5 && !args.force) {
       return { timelineIds: [], publishedSimulationIds: [], skipped: true };
     }
 
@@ -153,6 +157,9 @@ export const seedAll = internalMutation({
             ...demoPhase1.generationalShift,
             ...demoPhase2.globalConsequence,
           ],
+          immediateRipple: demoPhase1.immediateRipple,
+          generationalShift: demoPhase1.generationalShift,
+          globalConsequence: demoPhase2.globalConsequence,
           chaosScore: pub.chaosScore,
           lostToHistory: demoPhase2.lostToHistory,
           gainedByHumanity: demoPhase2.gainedByHumanity,

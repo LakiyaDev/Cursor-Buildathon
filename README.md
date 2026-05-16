@@ -433,9 +433,18 @@ AltEra turns history into an interactive simulation. It helps users understand t
 ## Development
 
 ```bash
-npm install
-npx convex dev   # terminal 1
-npm run dev      # terminal 2 — http://localhost:3000
+npm run install:all
+npx convex dev        # terminal 1 (repo root — writes .env.local)
+npm run dev           # terminal 2 — syncs env + http://localhost:3000
 ```
 
-Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_CONVEX_URL` from Convex. Set `GEMINI_API_KEY` in Convex dashboard for AI actions.
+## Project layout
+
+| Path | Purpose |
+|------|---------|
+| `convex/` | Convex backend (database, auth, AI actions) |
+| `frontend/` | Next.js app (`app/`, `components/`, `public/`) |
+| `.env.local` | Repo root — created by `npx convex dev` |
+| `frontend/.env.local` | Auto-synced copy for Next.js (`npm run sync-env`) |
+
+Copy `.env.example` to `.env.local` at the **repo root**. After `npx convex dev` updates env vars, run `npm run sync-env` (or use `npm run dev`, which syncs automatically). Set `GEMINI_API_KEY` in the Convex dashboard for AI actions.

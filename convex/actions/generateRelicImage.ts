@@ -3,7 +3,10 @@
 import { action } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
+import { isDemoMode } from "../lib/demo";
+import { demoPhase2 } from "../seed/demoData";
 import { generateRelicPng } from "../lib/gemini";
+import { isGeminiQuotaError } from "../lib/geminiErrors";
 
 export const run = action({
   args: {
@@ -12,16 +15,23 @@ export const run = action({
   },
   returns: v.object({ ok: v.boolean(), skipped: v.boolean() }),
   handler: async (ctx, args) => {
-    const sim = await ctx.runQuery(internal.simulationsInternal.getGenerationContext, {
+    const relicPrompt = await ctx.runQuery(internal.simulationsInternal.getRelicPrompt, {
       simulationId: args.simulationId,
     });
-    if (!sim) throw new Error("Simulation not found");
+    if (!relicPrompt && !isDemoMode(args.demo)) {
+      throw new Error("Simulation not ready for relic generation");
+    }
 
     const prompt =
       "Alternate history museum relic photograph, archival lighting: " +
-      (args.demo ? "Kandyan royal seal from a timeline where the Convention failed" : "historical artifact from divergent timeline");
+      (relicPrompt ?? demoPhase2.relicPrompt);
 
-    const png = await generateRelicPng(prompt);
+    let png: Uint8Array | null = null;
+    try {
+      png = await generateRelicPng(prompt);
+    } catch (err) {
+      if (!isGeminiQuotaError(err)) throw err;
+    }
     if (!png) {
       return { ok: true, skipped: true };
     }

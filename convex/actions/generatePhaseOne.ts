@@ -4,7 +4,8 @@ import { action } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import { demoPhase1 } from "../seed/demoData";
-import { demoSimulation, isDemoMode } from "../lib/demo";
+import { isDemoMode } from "../lib/demo";
+import { pickDemoPhase1 } from "../lib/demoFixtures";
 import { generateJson } from "../lib/gemini";
 import { isGeminiQuotaError } from "../lib/geminiErrors";
 
@@ -22,13 +23,25 @@ export const run = action({
   },
   returns: v.object({ ok: v.boolean(), usedDemoFallback: v.optional(v.boolean()) }),
   handler: async (ctx, args) => {
+    const context = await ctx.runQuery(internal.simulationsInternal.getGenerationContext, {
+      simulationId: args.simulationId,
+    });
+    if (!context) throw new Error("Simulation context not found");
+
+    const fixtureCtx = {
+      timelineSlug: context.timelineSlug,
+      incidentTitle: context.incidentTitle,
+      incidentYear: context.incidentYear,
+    };
+
     const applyDemo = async () => {
+      const fixtures = pickDemoPhase1(fixtureCtx);
       await ctx.runMutation(internal.simulationsInternal.patchPhase1, {
         simulationId: args.simulationId,
-        chaosScore: demoSimulation.chaosScore ?? demoPhase1.chaosScore,
-        immediateRipple: demoPhase1.immediateRipple,
-        generationalShift: demoPhase1.generationalShift,
-        branchChoices: demoPhase1.branchChoices,
+        chaosScore: fixtures.chaosScore,
+        immediateRipple: fixtures.immediateRipple,
+        generationalShift: fixtures.generationalShift,
+        branchChoices: fixtures.branchChoices,
       });
     };
 
@@ -36,11 +49,6 @@ export const run = action({
       await applyDemo();
       return { ok: true };
     }
-
-    const context = await ctx.runQuery(internal.simulationsInternal.getGenerationContext, {
-      simulationId: args.simulationId,
-    });
-    if (!context) throw new Error("Simulation context not found");
 
     try {
       const data = await generateJson<{
@@ -66,7 +74,9 @@ What if: ${context.whatIfPrompt}`,
       return { ok: true };
     } catch (err) {
       if (isGeminiQuotaError(err)) {
-        console.warn("[AltEra] Gemini quota exceeded — using demo fixtures for phase 1");
+        console.warn(
+          `[AltEra] Gemini quota exceeded — using timeline demo fixtures (${fixtureCtx.timelineSlug ?? "inferred"})`,
+        );
         await applyDemo();
         return { ok: true, usedDemoFallback: true };
       }
